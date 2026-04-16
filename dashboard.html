@@ -1,105 +1,128 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Dashboard Bitácora</title>
+    <meta charset="UTF-8">
+    <title>Dashboard Bitácora</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables -->
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 
-<!-- DataTables -->
-<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- Buttons Excel -->
+    <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
 
-<!-- Buttons Excel -->
-<link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body {
+        background: #f4f6f9;
+        }
+        .card-kpi {
+        border-radius: 12px;
+        padding: 15px;
+        color: white;
+        }
+        .kpi-1 { background:#4e73df; }
+        .kpi-2 { background:#1cc88a; }
+        .kpi-3 { background:#f6c23e; }
 
-<style>
-body {
-  background: #f4f6f9;
-}
-.card-kpi {
-  border-radius: 12px;
-  padding: 15px;
-  color: white;
-}
-.kpi-1 { background:#4e73df; }
-.kpi-2 { background:#1cc88a; }
-.kpi-3 { background:#f6c23e; }
-</style>
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(44, 62, 80, 0.7);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loader-content {
+            text-align: center;
+        }
+        #loader {
+            backdrop-filter: blur(4px);
+        }
+    </style>
 </head>
 
 <body>
-
+<!-- LOADER -->
+<div id="loader" class="d-none">
+  <div class="loader-content text-center">
+    <div class="spinner-border text-light" style="width: 3rem; height: 3rem;"></div>
+    <div class="mt-3 text-light">Cargando datos...</div>
+  </div>
+</div>
 <div class="container py-4">
-
-<h4 class="mb-3">📊 Dashboard Bitácora</h4>
-
-<!-- FILTROS -->
-<div class="row mb-3">
-  <div class="col-md-3">
-    <input type="date" id="fechaInicio" class="form-control">
-  </div>
-  <div class="col-md-3">
-    <input type="date" id="fechaFin" class="form-control">
-  </div>
-  <div class="col-md-3">
-    <input type="text" id="filtroUsuario" class="form-control" placeholder="Filtrar por identificación">
-  </div>
-  <div class="col-md-3">
-    <button onclick="cargarDatos()" class="btn btn-primary w-100">Filtrar</button>
-  </div>
-</div>
-
-<!-- KPIs -->
-<div class="row mb-3">
-  <div class="col-md-4">
-    <div class="card-kpi kpi-1">
-      <h6>Total Registros</h6>
-      <h4 id="totalRegistros">0</h4>
+    <h4 class="mb-3">📊 Dashboard Bitácora INGEVIAS</h4>
+    <!-- FILTROS -->
+    <div class="row mb-3">
+    <div class="col-md-3">
+        <input type="date" id="fechaInicio" class="form-control">
     </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card-kpi kpi-2">
-      <h6>Horas Trabajadas</h6>
-      <h4 id="totalHoras">0</h4>
+    <div class="col-md-3">
+        <input type="date" id="fechaFin" class="form-control">
     </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card-kpi kpi-3">
-      <h6>Productividad</h6>
-      <h4 id="productividad">0</h4>
+    <div class="col-md-3">
+        <input type="text" id="filtroUsuario" class="form-control" placeholder="Filtrar por identificación">
     </div>
-  </div>
-</div>
+    <div class="col-md-3">
+        <button onclick="cargarDatos()" class="btn btn-primary w-100">Filtrar</button>
+    </div>
+    </div>
 
-<!-- GRAFICA -->
-<canvas id="grafica" class="mb-4"></canvas>
+    <!-- KPIs -->
+    <div class="row mb-3">
+    <div class="col-md-4">
+        <div class="card-kpi kpi-1">
+        <h6>Total Registros</h6>
+        <h4 id="totalRegistros">0</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-kpi kpi-2">
+        <h6>Horas Trabajadas</h6>
+        <h4 id="totalHoras">0</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-kpi kpi-3">
+        <h6>Productividad</h6>
+        <h4 id="productividad">0</h4>
+        </div>
+    </div>
+    </div>
 
-<!-- TABLA -->
-<table id="tabla" class="table table-striped w-100">
-  <thead>
-    <tr>
-      <th>Fecha</th>
-      <th>Hora Inicio</th>
-      <th>Hora Fin</th>
-      <th>Horas</th>
-      <th>Máquina</th>
-      <th>Identificación</th>
-      <th>Descripción</th>
-    </tr>
-  </thead>
-</table>
+    <!-- GRAFICA -->
+    <canvas id="grafica" class="mb-4"></canvas>
+
+    <!-- TABLA -->
+    <table id="tabla" class="table table-striped w-100">
+    <thead>
+        <tr>
+        <th>Fecha</th>
+        <th>Hora Inicio</th>
+        <th>Hora Fin</th>
+        <th>Horas</th>
+        <th>Máquina</th>
+        <th>Identificación</th>
+        <th>Descripción</th>
+        </tr>
+    </thead>
+    </table>
 
 </div>
 
@@ -107,6 +130,16 @@ body {
     const API_URL = "https://script.google.com/macros/s/AKfycbxTtofOn8qh6eqx0pkk6-UmrlH8mOdG_wGTZbvBd1Q2FxvsQb2qAa7_KWIaY6NX4fWUcQ/exec";
     let tabla;
     let grafica = null;
+
+    function mostrarLoader() 
+    {
+        document.getElementById("loader").classList.remove("d-none");
+    }
+
+    function ocultarLoader() 
+    {
+        document.getElementById("loader").classList.add("d-none");
+    }
     //calcular horas
     function calcularHoras(inicio, fin) 
     {
@@ -118,43 +151,61 @@ body {
     }
 
     //cargar datos
-    async function cargarDatos() 
-    {
-        const f1 = document.getElementById("fechaInicio").value;
-        const f2 = document.getElementById("fechaFin").value;
-        const usuario = document.getElementById("filtroUsuario").value;
-        let url = API_URL;
-        if (f1 && f2) {
+    async function cargarDatos() {
+        mostrarLoader(); // 🔥 ACTIVAR
+        try {
+
+            const f1 = document.getElementById("fechaInicio").value;
+            const f2 = document.getElementById("fechaFin").value;
+            const usuario = document.getElementById("filtroUsuario").value;
+
+            let url = API_URL;
+
+            if (f1 && f2) {
             url += `?fechaInicio=${f1}&fechaFin=${f2}`;
-        }
-        const res = await fetch(url);
-        let data = await res.json();
-        // filtro por usuario
-        if (usuario) 
-        {
-           data = data.filter(d =>
+            }
+
+            const res = await fetch(url);
+            let data = await res.json();
+
+            if (usuario) {
+            data = data.filter(d =>
                 String(d.Identificacion || "").includes(usuario)
-                );
-        }
-        // calcular horas
-        let totalHoras = 0;
-            data.forEach(d => 
-            {
-                //FORMATEAR
-                d.Fecha = formatearFecha(d.Fecha);
-                d.HoraInicio = formatearHora(d.HoraInicio);
-                d.HoraFin = formatearHora(d.HoraFin);
-                //CALCULAR HORAS
-                d.horas = calcularHoras(d.HoraInicio, d.HoraFin);
-                totalHoras += parseFloat(d.horas);
+            );
+            }
+
+            let totalHoras = 0;
+
+            data.forEach(d => {
+
+            d.Fecha = formatearFecha(d.Fecha);
+            d.HoraInicio = formatearHora(d.HoraInicio);
+            d.HoraFin = formatearHora(d.HoraFin);
+
+            d.horas = calcularHoras(d.HoraInicio, d.HoraFin);
+
+            totalHoras += parseFloat(d.horas);
             });
-        // KPIs
-        document.getElementById("totalRegistros").innerText = data.length;
-        document.getElementById("totalHoras").innerText = totalHoras;
-        const productividad = data.length ? (totalHoras / data.length).toFixed(2) : 0;
-        document.getElementById("productividad").innerText = productividad;
-        cargarTabla(data);
-        cargarGrafica(data);
+
+            document.getElementById("totalRegistros").innerText = data.length;
+            document.getElementById("totalHoras").innerText = totalHoras.toFixed(2);
+
+            const productividad = data.length ? (totalHoras / data.length).toFixed(2) : 0;
+            document.getElementById("productividad").innerText = productividad;
+
+            cargarTabla(data);
+            cargarGrafica(data);
+
+        } catch (error) {
+
+            console.error(error);
+            alert("Error cargando datos");
+
+        } finally {
+
+            ocultarLoader(); // 🔥 SIEMPRE OCULTA
+
+        }
     }
 
     //gráfica
