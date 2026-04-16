@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Bitácora de Registro Diario</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body {
+  background: linear-gradient(135deg, #7a7c7e, #151817);
+  min-height: 100vh;
+}
+
+.card-custom {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.card-header {
+  background: #2c3e50;
+  color: white;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.btn-custom {
+  background: #0a0a0a;
+  border: none;
+}
+
+.btn-custom:hover {
+  background: #69b198;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7">
+
+      <div class="card shadow card-custom">
+        <div class="card-header">
+          📋 Bitácora de Registro Diario
+        </div>
+
+        <div class="card-body">
+            <div id="alerta" class="mt-3"></div>
+            <form id="formBitacora">
+                <!-- Fecha automática -->
+                <div class="mb-3">
+                    <label class="form-label">Fecha</label>
+                    <input type="text" id="fecha" class="form-control" readonly>
+                </div>
+
+                <!-- Horas -->
+                <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Hora Inicio</label>
+                    <input type="time" id="horaInicio" class="form-control" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Hora Fin</label>
+                    <input type="time" id="horaFin" class="form-control" required>
+                    </div>
+                </div>
+
+                <!-- Maquinaria -->
+                <div class="mb-3">
+                    <label>Tipo de Maquinaria</label>
+                    <select id="maquina" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        <option value="EXC01|Excavadora">Excavadora</option>
+                        <option value="BUL02|Bulldozer">Bulldozer</option>
+                        <option value="RET03|Retroexcavadora">Retroexcavadora</option>
+                        <option value="GRU04|Grúa">Grúa</option>
+                    </select>
+                </div>
+
+                <!-- Tipo documento -->
+                <div class="mb-3">
+                    <label>Tipo de Identificación</label>
+                    <select id="tipoId" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        <option value="CC">Cédula de Ciudadanía</option>
+                        <option value="NIT">NIT</option>
+                        <option value="CE">Cédula de Extranjería</option>
+                        <option value="PAS">Pasaporte</option>
+                    </select>
+                </div>
+
+                <!-- Identificación -->
+                <div class="mb-3">
+                <label>Número de Identificación</label>
+                <input type="text" id="identificacion" class="form-control" required>
+                </div>
+
+                <!-- Descripción -->
+                <div class="mb-3">
+                <label>Descripción de la actividad</label>
+                <textarea id="descripcion" class="form-control" rows="4" required></textarea>
+                </div>
+
+                <button id="btnGuardar" class="btn btn-custom w-100 text-white">
+                    <span id="textoBtn">Guardar Registro</span>
+                    <span id="spinnerBtn" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+                </button>
+
+            </form>
+        </div>
+        <footer class="text-center py-4 bg-white border-top">
+            <p class="small text-muted mb-0">By <a href="https://datorres1108.github.io/cv/" target="_blank"> Datorres </a>© 2026 | Version 1-20260418 </p>
+        </footer>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- MODAL -->
+<div class="modal fade" id="modalMensaje" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">✔ Registro exitoso</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <p id="modalTexto">Registro guardado correctamente</p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS (IMPORTANTE) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
