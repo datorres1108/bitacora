@@ -94,29 +94,36 @@
     </div>
     <div class="col-md-4">
         <div class="card-kpi kpi-2">
-        <h6>Horas Trabajadas</h6>
-        <h4 id="totalHoras">0</h4>
+        <h6>Actividad Principal</h6>
+        <h4 id="actividadPrincipal" style="font-size: 1.1rem;">-</h4>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card-kpi kpi-3">
-        <h6>Productividad</h6>
-        <h4 id="productividad">0</h4>
+        <h6>Solicitudes Digitales</h6>
+        <h4 id="totalDigitales">0</h4>
         </div>
     </div>
     </div>
 
-    <!-- GRAFICA -->
-    <canvas id="grafica" class="mb-4"></canvas>
+    <!-- GRÁFICAS -->
+    <div class="row mb-4">
+        <div class="col-md-7">
+            <canvas id="grafica"></canvas>
+        </div>
+        <div class="col-md-5">
+            <canvas id="graficaPastel"></canvas>
+        </div>
+    </div>
 
     <!-- TABLA -->
     <table id="tabla" class="table table-striped w-100">
     <thead>
         <tr>
         <th>Fecha</th>
-        <th>Hora Inicio</th>
-        <th>Hora Fin</th>
-        <th>Horas</th>
+        <!-- <th>Hora Inicio</th>
+        <th>Hora Fin</th> -->
+        <!-- <th>Horas</th> -->
         <th>Tipo de Actividad</th>
         <th>Usuario Actividad</th>
         <th>Descripción</th>
@@ -127,9 +134,10 @@
 </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyBVDM-PcEUN3jMWH3uFf0Ei3b63oD-NOLn14md7FJmo4GqZvPQeuOzTq2smZG9hUaTvw/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwlwLV6EmTOou8XVlS4dZ2h34o2gtsbdn7a0GS7jwJ2HZjh_0OPvLc9KKgzgQSvczA-RA/exec";
     let tabla;
     let grafica = null;
+    let graficaPastel = null;
 
     function mostrarLoader() 
     {
@@ -139,15 +147,6 @@
     function ocultarLoader() 
     {
         document.getElementById("loader").classList.add("d-none");
-    }
-    //calcular horas
-    function calcularHoras(inicio, fin) 
-    {
-        if (!inicio || !fin) return 0;
-        const [h1, m1] = inicio.split(":").map(Number);
-        const [h2, m2] = fin.split(":").map(Number);
-        const total = (h2 + m2/60) - (h1 + m1/60);
-        return total > 0 ? total.toFixed(2) : 0;
     }
 
     //cargar datos
@@ -174,31 +173,44 @@
             );
             }
 
-            let totalHoras = 0;
+            const conteoTipos = {};
+            let totalDigitales = 0;
             const nombresTipos = {
                 "PRS": "PRS Generado en Página",
                 "SC": "Solicitud por Correo",
                 "SW": "Solicitud por Whatsapp",
-                "ST": "Solicitud por Teléfono"
+                "ST": "Solicitud por Teléfono",
+                "TM": "Solicitud por Teams",
+                "OT": "Otro"
             };
 
             data.forEach(d => {
-            d.Fecha = formatearFecha(d.Fecha);
-            d.HoraInicio = formatearHora(d.HoraInicio);
-            d.HoraFin = formatearHora(d.HoraFin);
-            d.horas = calcularHoras(d.HoraInicio, d.HoraFin);
-            // Mapear el ID al nombre descriptivo para la gráfica y la tabla
-            const id = d.tipoID || d.TipoId || d.tipoId || d.TipoID || "Otro";
-            d.TipoActividadNombre = nombresTipos[id] || id;
+                d.Fecha = formatearFecha(d.Fecha);
+                
+                // Mapear el ID al nombre descriptivo
+                const tid = d.tipoId || d.TipoId || d.tipoID || d.TipoID || "";
+                d.TipoActividadNombre = nombresTipos[tid] || tid || "Otro";
 
-            totalHoras += parseFloat(d.horas);
+                // Acumuladores para KPIs
+                conteoTipos[tid] = (conteoTipos[tid] || 0) + 1;
+                if (["PRS", "SC", "SW"].includes(tid)) {
+                    totalDigitales++;
+                }
+            });
+
+            // Determinar la actividad más frecuente (Moda)
+            let maxTipo = "N/A";
+            let maxValor = 0;
+            Object.keys(conteoTipos).forEach(key => {
+                if (conteoTipos[key] > maxValor) {
+                    maxValor = conteoTipos[key];
+                    maxTipo = nombresTipos[key] || key;
+                }
             });
 
             document.getElementById("totalRegistros").innerText = data.length;
-            document.getElementById("totalHoras").innerText = totalHoras.toFixed(2);
-
-            const productividad = data.length ? (totalHoras / data.length).toFixed(2) : 0;
-            document.getElementById("productividad").innerText = productividad;
+            document.getElementById("actividadPrincipal").innerText = maxTipo;
+            document.getElementById("totalDigitales").innerText = totalDigitales;
 
             cargarTabla(data);
             cargarGrafica(data);
@@ -222,20 +234,28 @@
         data.forEach(r => {
             conteo[r.TipoActividadNombre] = (conteo[r.TipoActividadNombre] || 0) + 1;
         });
-        //destruir anterior
-        if (grafica) 
-        {
-            grafica.destroy();
-        }
+
+        const labels = Object.keys(conteo);
+        const values = Object.values(conteo);
+        const colors = [
+            'rgba(78, 115, 223, 0.7)',  // Azul
+            'rgba(28, 200, 138, 0.7)',  // Verde
+            'rgba(246, 194, 62, 0.7)',  // Amarillo
+            'rgba(231, 74, 59, 0.7)',   // Rojo
+            'rgba(54, 185, 204, 0.7)'   // Cian
+        ];
+
+        if (grafica) grafica.destroy();
+        if (graficaPastel) graficaPastel.destroy();
+
         grafica = new Chart(document.getElementById("grafica"), {
             type: "bar",
             data: {
-            labels: Object.keys(conteo),
+            labels: labels,
             datasets: [{ 
                 label: 'Cantidad de Actividades',
-                data: Object.values(conteo),
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                data: values,
+                backgroundColor: colors,
                 borderWidth: 1
             }]
             },
@@ -247,6 +267,23 @@
                             stepSize: 1
                         }
                     }
+                }
+            }
+        });
+
+        graficaPastel = new Chart(document.getElementById("graficaPastel"), {
+            type: "pie",
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
                 }
             }
         });
@@ -268,9 +305,9 @@
             ],
             columns: [
             { data: 'Fecha' },
-            { data: 'HoraInicio' },
-            { data: 'HoraFin' },
-            { data: 'horas' },
+            // { data: 'HoraInicio' },
+            // { data: 'HoraFin' },
+            // { data: 'horas' },
             { data: 'TipoActividadNombre' },
             { data: 'Identificacion' },
             { data: 'Descripcion' }

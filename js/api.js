@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbyBVDM-PcEUN3jMWH3uFf0Ei3b63oD-NOLn14md7FJmo4GqZvPQeuOzTq2smZG9hUaTvw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwlwLV6EmTOou8XVlS4dZ2h34o2gtsbdn7a0GS7jwJ2HZjh_0OPvLc9KKgzgQSvczA-RA/exec";
 const API = {
   async guardar(data) {
     try {

@@ -12,19 +12,12 @@ document.addEventListener("DOMContentLoaded", () => {
         {
             const data = {
             fecha: document.getElementById("fecha").value,
-            horaInicio: document.getElementById("horaInicio").value,
-            horaFin: document.getElementById("horaFin").value,
             tipoId: document.getElementById("tipoId").value,
             identificacion: document.getElementById("identificacion").value,
             descripcion: document.getElementById("descripcion").value
             };
 
-            if (data.horaFin <= data.horaInicio) {
-              throw new Error("La hora fin debe ser mayor que la hora inicio");
-            }
-
             const res = await API.guardar(data);
-
             if (res.code !== 200) {
               throw new Error(res.message);
             }
