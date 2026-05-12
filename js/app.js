@@ -10,13 +10,10 @@ document.addEventListener("DOMContentLoaded", () => {
         await new Promise(resolve => setTimeout(resolve, 50));
         try 
         {
-            const maquina = document.getElementById("maquina").value.split("|");
             const data = {
             fecha: document.getElementById("fecha").value,
             horaInicio: document.getElementById("horaInicio").value,
             horaFin: document.getElementById("horaFin").value,
-            maquinaCodigo: maquina[0],
-            maquinaNombre: maquina[1],
             tipoId: document.getElementById("tipoId").value,
             identificacion: document.getElementById("identificacion").value,
             descripcion: document.getElementById("descripcion").value

@@ -67,7 +67,7 @@
   </div>
 </div>
 <div class="container py-4">
-    <h4 class="mb-3">📊 Dashboard Bitácora INGEVIAS</h4>
+    <h4 class="mb-3">📊 Dashboard Bitácora Actividades Diarias</h4>
     <!-- FILTROS -->
     <div class="row mb-3">
     <div class="col-md-3">
@@ -117,8 +117,8 @@
         <th>Hora Inicio</th>
         <th>Hora Fin</th>
         <th>Horas</th>
-        <th>Máquina</th>
-        <th>Identificación</th>
+        <th>Tipo de Actividad</th>
+        <th>Usuario Actividad</th>
         <th>Descripción</th>
         </tr>
     </thead>
@@ -127,7 +127,7 @@
 </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxTtofOn8qh6eqx0pkk6-UmrlH8mOdG_wGTZbvBd1Q2FxvsQb2qAa7_KWIaY6NX4fWUcQ/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyBVDM-PcEUN3jMWH3uFf0Ei3b63oD-NOLn14md7FJmo4GqZvPQeuOzTq2smZG9hUaTvw/exec";
     let tabla;
     let grafica = null;
 
@@ -175,14 +175,21 @@
             }
 
             let totalHoras = 0;
+            const nombresTipos = {
+                "PRS": "PRS Generado en Página",
+                "SC": "Solicitud por Correo",
+                "SW": "Solicitud por Whatsapp",
+                "ST": "Solicitud por Teléfono"
+            };
 
             data.forEach(d => {
-
             d.Fecha = formatearFecha(d.Fecha);
             d.HoraInicio = formatearHora(d.HoraInicio);
             d.HoraFin = formatearHora(d.HoraFin);
-
             d.horas = calcularHoras(d.HoraInicio, d.HoraFin);
+            // Mapear el ID al nombre descriptivo para la gráfica y la tabla
+            const id = d.tipoID || d.TipoId || d.tipoId || d.TipoID || "Otro";
+            d.TipoActividadNombre = nombresTipos[id] || id;
 
             totalHoras += parseFloat(d.horas);
             });
@@ -213,7 +220,7 @@
     {
         const conteo = {};
         data.forEach(r => {
-            conteo[r.MaquinaNombre] = (conteo[r.MaquinaNombre] || 0) + 1;
+            conteo[r.TipoActividadNombre] = (conteo[r.TipoActividadNombre] || 0) + 1;
         });
         //destruir anterior
         if (grafica) 
@@ -224,7 +231,23 @@
             type: "bar",
             data: {
             labels: Object.keys(conteo),
-            datasets: [{ data: Object.values(conteo) }]
+            datasets: [{ 
+                label: 'Cantidad de Actividades',
+                data: Object.values(conteo),
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
             }
         });
     }
@@ -248,7 +271,7 @@
             { data: 'HoraInicio' },
             { data: 'HoraFin' },
             { data: 'horas' },
-            { data: 'MaquinaNombre' },
+            { data: 'TipoActividadNombre' },
             { data: 'Identificacion' },
             { data: 'Descripcion' }
             ]
