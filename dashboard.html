@@ -76,9 +76,9 @@
     <div class="col-md-3">
         <input type="date" id="fechaFin" class="form-control">
     </div>
-    <div class="col-md-3">
+    <!-- <div class="col-md-3">
         <input type="text" id="filtroUsuario" class="form-control" placeholder="Filtrar por identificación">
-    </div>
+    </div> -->
     <div class="col-md-3">
         <button onclick="cargarDatos()" class="btn btn-primary w-100">Filtrar</button>
     </div>
@@ -156,22 +156,16 @@
 
             const f1 = document.getElementById("fechaInicio").value;
             const f2 = document.getElementById("fechaFin").value;
-            const usuario = document.getElementById("filtroUsuario").value;
-
-            let url = API_URL;
-
-            if (f1 && f2) {
-            url += `?fechaInicio=${f1}&fechaFin=${f2}`;
-            }
-
-            const res = await fetch(url);
+            
+            // Obtenemos todos los datos. Realizaremos el filtrado en el cliente para mayor fiabilidad.
+            const res = await fetch(API_URL);
             let data = await res.json();
 
-            if (usuario) {
-            data = data.filter(d =>
-                String(d.Identificacion || "").includes(usuario)
-            );
-            }
+            // if (usuario) {
+            //     data = data.filter(d =>
+            //         String(d.Identificacion || "").includes(usuario)
+            //     );
+            // }
 
             const conteoTipos = {};
             let totalDigitales = 0;
@@ -183,19 +177,27 @@
                 "TM": "Solicitud por Teams",
                 "OT": "Otro"
             };
+            
+            // Filtrar y procesar los datos en un solo paso
+            data = data.filter(d => {
+                const fechaProcesada = formatearFecha(d.Fecha);
 
-            data.forEach(d => {
-                d.Fecha = formatearFecha(d.Fecha);
-                
+                // Validar rango de fechas (comparación de cadenas YYYY-MM-DD)
+                if (f1 && fechaProcesada < f1) return false;
+                if (f2 && fechaProcesada > f2) return false;
+
+                // Si pasa el filtro, preparamos el objeto para la interfaz
+                d.Fecha = fechaProcesada;
+
                 // Mapear el ID al nombre descriptivo
                 const tid = d.tipoId || d.TipoId || d.tipoID || d.TipoID || "";
                 d.TipoActividadNombre = nombresTipos[tid] || tid || "Otro";
-
                 // Acumuladores para KPIs
                 conteoTipos[tid] = (conteoTipos[tid] || 0) + 1;
                 if (["PRS", "SC", "SW"].includes(tid)) {
                     totalDigitales++;
                 }
+                return true;
             });
 
             // Determinar la actividad más frecuente (Moda)
